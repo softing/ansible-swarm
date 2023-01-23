@@ -1,0 +1,59 @@
+---
+
+- name: "Swarm::Server | Check required variables"
+  ansible.builtin.fail: msg="Variable '{{ item }}' is not defined"
+  when: (vars[item] is not defined) or (vars[item] is none) or (vars[item]|length == 0)
+  with_items: "{{ required_vars }}"
+
+# Setup Docker daemon
+
+- name: "Swarm::Server | mkdir /etc/systemd/system/docker.service.d/"
+  file:
+    path: /etc/systemd/system/docker.service.d/
+    state: directory
+
+- name: "Swarm::Server | Copy /etc/systemd/system/docker.service.d/docker.conf"
+  template:
+    src: docker.conf.j2
+    dest: /etc/systemd/system/docker.service.d/docker.conf
+    mode: 0440
+
+- name: "Swarm::Server | Copy /etc/docker/daemon.json"
+  template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    mode: 0440
+
+# Copy CA certs
+
+- name: "Swarm::Server | Copy /etc/docker/ca.pem"
+  copy:
+    src: "{{ swarm_server_ca_folder }}/{{ swarm_server_ca_domain }}.crt.pem"
+    dest: /etc/docker/ca.pem
+    owner: root
+    group: docker
+    mode: '0440'
+
+# Copy Server certs
+
+- name: "Swarm::Server | Copy /etc/docker/server-cert.pem"
+  copy:
+    src: "{{ swarm_server_ca_folder }}/servers/{{ swarm_server_hostname }}.{{ swarm_server_ca_domain }}.crt.pem"
+    dest: /etc/docker/server-cert.pem
+    owner: root
+    group: docker
+    mode: '0440'
+
+- name: "Swarm::Server | Copy /etc/docker/server-key.pem"
+  copy:
+    src: "{{ swarm_server_ca_folder }}/servers/{{ swarm_server_hostname }}.{{ swarm_server_ca_domain }}.key.pem"
+    dest: /etc/docker/server-key.pem
+    owner: root
+    group: docker
+    mode: '0440'
+
+- name: "Swarm::Server | Restart docker service"
+  ansible.builtin.systemd:
+    state: restarted
+    daemon_reload: yes
+    name: docker

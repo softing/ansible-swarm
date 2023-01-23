@@ -1,0 +1,15 @@
+---
+
+- name: "Swarm::Manager | Check required variables"
+  ansible.builtin.fail: msg="Variable '{{ item }}' is not defined"
+  when: (vars[item] is not defined) or (vars[item] is none) or (vars[item]|length == 0)
+  with_items: "{{ required_vars }}"
+
+- name: "Swarm::Manager | Check swarm state"
+  shell: docker info --format \{\{.Swarm.LocalNodeState\}\}
+  register: swarm_status
+  ignore_errors: true
+
+- name: "Swarm::Manager | Add node to the swarm"
+  shell: "docker swarm join --token {{ swarm_manager_token }} {{ swarm_master_ip }}"
+  when: "'inactive' in swarm_status.stdout_lines"

@@ -1,0 +1,40 @@
+---
+- name: "Swarm::Client | Check required variables"
+  ansible.builtin.fail: msg="Variable '{{ item }}' is not defined"
+  when: (vars[item] is not defined) or (vars[item] is none) or (vars[item]|length == 0)
+  with_items: "{{ required_vars }}"
+
+- name: "Swarm::Client | Creates /home/{{ item }}/.docker folder"
+  file:
+    owner: "{{ item.user }}"
+    group: docker
+    path: "{{ item.folder }}/.docker"
+    state: directory
+  loop: "{{ swarm_client_docker_users }}"
+
+- name: "Swarm::Client | Copy {{ swarm_client_ca_folder }}/{{ swarm_client_ca_domain }}.crt.pem"
+  copy:
+    src: "{{ swarm_client_ca_folder }}/{{ swarm_client_ca_domain }}.crt.pem"
+    dest: "{{ item.folder }}/.docker/ca.pem"
+    owner: "{{ item.user }}"
+    group: docker
+    mode: '0440'
+  loop: "{{ swarm_client_docker_users }}"
+
+- name: "Swarm::Client | Copy {{ swarm_client_ca_folder }}/clients/{{ swarm_client_hostname }}.{{ swarm_client_ca_domain }}.crt.pem"
+  copy:
+    src: "{{ swarm_client_ca_folder }}/clients/{{ swarm_client_hostname }}.{{ swarm_client_ca_domain }}.crt.pem"
+    dest: "{{ item.folder }}/.docker/cert.pem"
+    owner: "{{ item.user }}"
+    group: docker
+    mode: '0440'
+  loop: "{{ swarm_client_docker_users }}"
+
+- name: "Swarm::Client | Copy {{ swarm_client_ca_folder }}/clients/{{ swarm_client_hostname }}.{{ swarm_client_ca_domain }}.key.pem"
+  copy:
+    src: "{{ swarm_client_ca_folder }}/clients/{{ swarm_client_hostname }}.{{ swarm_client_ca_domain }}.key.pem"
+    dest: "{{ item.folder }}/.docker/key.pem"
+    owner: "{{ item.user }}"
+    group: docker
+    mode: '0440'
+  loop: "{{ swarm_client_docker_users }}"

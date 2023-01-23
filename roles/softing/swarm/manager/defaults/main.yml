@@ -1,0 +1,8 @@
+---
+
+required_vars:
+  - swarm_manager_token
+  - swarm_master_ip
+
+swarm_manager_token:
+swarm_master_ip:

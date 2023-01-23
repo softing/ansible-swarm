@@ -1,0 +1,12 @@
+---
+
+required_vars:
+  - swarm_server_node_ip
+  - swarm_server_hostname
+  - swarm_server_ca_domain
+  - swarm_server_ca_folder
+
+swarm_server_node_ip:
+swarm_server_hostname:
+swarm_server_ca_folder:
+swarm_server_ca_domain:

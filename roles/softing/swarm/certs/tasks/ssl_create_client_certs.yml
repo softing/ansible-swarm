@@ -1,0 +1,66 @@
+---
+
+# CSR Key
+
+- become: no
+  connection: local
+  delegate_to: localhost
+  ansible.builtin.stat:
+    path: "{{ swarm_certs_folder }}/clients/{{ item }}.{{ swarm_certs_domain }}.key.pem"
+  register: client_key
+
+- name: "Swarm::Certs | Create host CSR signing key"
+  become: no
+  connection: local
+  delegate_to: localhost
+  openssl_privatekey:
+    path: "{{ swarm_certs_folder }}/clients/{{ item }}.{{ swarm_certs_domain }}.key.pem"
+  when: not client_key.stat.exists
+
+- become: no
+  connection: local
+  delegate_to: localhost
+  ansible.builtin.stat:
+    path: "{{ swarm_certs_folder }}/clients/{{ item }}.{{ swarm_certs_domain }}.key.pem"
+  register: client_key
+
+# CSR Request
+
+- become: no
+  connection: local
+  delegate_to: localhost
+  ansible.builtin.stat:
+    path: "{{ swarm_certs_folder }}/clients/{{ item }}.{{ swarm_certs_domain }}.csr.pem"
+  register: client_csr
+
+- name: SSL | Create the CSR for the host
+  become: no
+  connection: local
+  delegate_to: localhost
+  openssl_csr:
+    path: "{{ swarm_certs_folder }}/clients/{{ item }}.{{ swarm_certs_domain }}.csr.pem"
+    privatekey_path: "{{ client_key.stat.path }}"
+    subject:
+      CN: "client"
+    extended_key_usage: clientAuth
+  when: not client_csr.stat.exists
+
+- become: no
+  connection: local
+  delegate_to: localhost
+  ansible.builtin.stat:
+    path: "{{ swarm_certs_folder }}/clients/{{ item }}.{{ swarm_certs_domain }}.csr.pem"
+  register: client_csr
+
+# SSL Cert
+
+- name: "Swarm::Certs | Sign the CSR for the host"
+  become: no
+  connection: local
+  delegate_to: localhost
+  community.crypto.x509_certificate:
+    path: "{{ swarm_certs_folder }}/clients/{{ item }}.{{ swarm_certs_domain }}.crt.pem"
+    csr_path: "{{ client_csr.stat.path }}"
+    provider: ownca
+    ownca_path: "{{ ca_crt.stat.path }}"
+    ownca_privatekey_path: "{{ ca_key.stat.path }}"

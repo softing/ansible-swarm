@@ -1,0 +1,32 @@
+---
+
+- name: "Swarm::Init | Check swarm state"
+  shell: docker node ls
+  register: swarm_status
+  ignore_errors: true
+
+- name: "Swarm::Init | Initialize Docker Swarm"
+  shell: >
+    docker swarm init
+    --default-addr-pool 10.210.0.0/16
+    --default-addr-pool 10.211.0.0/16
+    --default-addr-pool 10.212.0.0/16
+    --default-addr-pool 10.213.0.0/16
+    --default-addr-pool 10.214.0.0/16
+    --default-addr-pool-mask-length 24
+    --advertise-addr={{ swarm_master_ip }}
+  when: swarm_status.rc != 0
+
+- name: "Swarm::Init | Manager join-token"
+  shell: docker swarm join-token --quiet manager
+  register: manager_token
+
+- ansible.builtin.set_fact:
+    manager_token: "{{ manager_token['stdout'] }}"
+
+- name: "Swarm::Init | Worker join-token"
+  shell: docker swarm join-token --quiet worker
+  register: worker_token
+
+- ansible.builtin.set_fact:
+    worker_token: "{{ worker_token['stdout'] }}"

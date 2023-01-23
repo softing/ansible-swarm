@@ -1,0 +1,15 @@
+---
+
+required_vars:
+  - swarm_certs_domain
+  - swarm_certs_folder
+  - swarm_certs_nodes
+
+swarm_certs_domain:
+swarm_certs_folder:
+swarm_certs_nodes:
+
+subject_alt_names:
+  - IP:127.0.0.1
+  - DNS:localhost
+  - DNS:docker.local

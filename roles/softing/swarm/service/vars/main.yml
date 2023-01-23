@@ -1,0 +1,5 @@
+---
+
+swarm_service_id: "{{ swarm_service_name }}"
+swarm_service_title: "{{ swarm_service_name | capitalize }}"
+swarm_service_path: "{{ swarm_service_root }}/{{ swarm_service_name }}"

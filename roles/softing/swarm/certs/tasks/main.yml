@@ -1,0 +1,90 @@
+---
+
+- name: "Swarm::Certs | Check required variables"
+  ansible.builtin.fail: msg="Variable '{{ item }}' is not defined"
+  when: (vars[item] is not defined) or (vars[item] is none) or (vars[item]|length == 0)
+  with_items: "{{ required_vars }}"
+
+# Generate some facts
+
+- name: "Swarm::Certs | Nodes"
+  ansible.builtin.debug:
+    msg: "{{ swarm_certs_nodes }}"
+
+- set_fact:
+    my_subject_alt_names: "{{ my_subject_alt_names | default([]) + [
+        'DNS:' + item.hostname,
+        'DNS:' + item.hostname + '.' + item.domain,
+        'DNS:' + item.hostname + '.' + 'local.cloud',
+        'IP:' + item.ip
+      ] }}"
+  with_items: "{{ swarm_certs_nodes }}"
+
+- name: "Swarm::Certs | Subject ALT names"
+  ansible.builtin.debug:
+    msg: "{{ my_subject_alt_names }}"
+
+- set_fact:
+    my_swarm_hosts: "{{ my_swarm_hosts | default([]) + [ item.hostname ] }}"
+  with_items: "{{ swarm_certs_nodes }}"
+
+- name: "Swarm::Certs | Hosts"
+  ansible.builtin.debug:
+    msg: "{{ my_swarm_hosts }}"
+
+- name: "Swarm::Certs | Certs folder"
+  ansible.builtin.debug:
+    msg: "{{ swarm_certs_folder }}"
+
+- name: "Swarm::Certs | Certs domain"
+  ansible.builtin.debug:
+    msg: "{{ swarm_certs_domain }}"
+
+# Create folders
+
+- file:
+    path: "{{ swarm_certs_folder }}/{{ item }}"
+    state: directory
+  loop:
+    - servers
+    - clients
+    - services
+
+# Register CA certs
+
+- ansible.builtin.stat:
+    path: "{{ swarm_certs_folder }}/{{ swarm_certs_domain }}.crt.pem"
+  register: ca_crt
+
+- ansible.builtin.stat:
+    path: "{{ swarm_certs_folder }}/{{ swarm_certs_domain }}.key.pem"
+  register: ca_key
+
+# If CA key or cert not exists we must creat one
+
+- ansible.builtin.shell:
+    cmd: >
+      openssl req -new -newkey rsa:4096 -nodes -x509 -subj '/CN={{ swarm_certs_domain }}'
+      -keyout {{ swarm_certs_folder }}/{{ swarm_certs_domain }}.key.pem
+      -out {{ swarm_certs_folder }}/{{ swarm_certs_domain }}.crt.pem
+  when: not ca_crt.stat.exists or not ca_key.stat.exists
+
+# Register CA certs again
+
+- ansible.builtin.stat:
+    path: "{{ swarm_certs_folder }}/{{ swarm_certs_domain }}.key.pem"
+  register: ca_key
+
+- ansible.builtin.stat:
+    path: "{{ swarm_certs_folder }}/{{ swarm_certs_domain }}.crt.pem"
+  register: ca_crt
+
+# Create certs
+
+- name: "Swarm::Certs | Create server certs"
+  include_tasks: tasks/ssl_create_server_certs.yml
+  loop: "{{ my_swarm_hosts }}"
+
+- name: "Swarm::Certs | Create server certs"
+  include_tasks: tasks/ssl_create_client_certs.yml
+  loop: "{{ my_swarm_hosts }}"

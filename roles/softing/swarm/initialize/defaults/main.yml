@@ -1,0 +1,4 @@
+---
+
+required_vars:
+  - swarm_master_ip

@@ -1,0 +1,30 @@
+---
+
+- name: "Swarm::Service | {{ swarm_service_title }} : Role variables"
+  ansible.builtin.debug:
+    msg:
+    - "swarm_service_id: {{ swarm_service_id }}"
+    - "swarm_service_title: {{ swarm_service_title }}"
+    - "swarm_service_path: {{ swarm_service_path }}"
+
+- name: "Swarm::Service | {{ swarm_service_title }} : Set public facts"
+  set_fact:
+    "swarm_service_id": "{{ swarm_service_id }}"
+    "swarm_service_title": "{{ swarm_service_title }}"
+    "swarm_service_path": "{{ swarm_service_path }}"
+
+- name: "Swarm::Service | {{ swarm_service_title }} : Create {{ swarm_service_path }} directory"
+  ansible.builtin.file:
+    path: "{{ swarm_service_path }}"
+    state: directory
+
+- name: "Swarm::Service | {{ swarm_service_title }} : Create {{ swarm_service_path }}/stack.yml"
+  ansible.builtin.template:
+    src: stack.yml
+    dest: "{{ swarm_service_path }}/stack.yml"
+    mode: 0440
+
+- debug:
+    msg: "Swarm::Service | Trigger update swarm service"
+    notify: update_swarm_service
+    changed_when: true

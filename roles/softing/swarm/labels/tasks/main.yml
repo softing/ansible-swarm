@@ -1,0 +1,5 @@
+---
+
+- name: "Swarm::Labels | Assign hostname label {{ item.key }} for {{ swarm_labels_hostname }}"
+  shell: "docker node update --label-add {{ item.key }}={{ item.value }} {{ swarm_labels_hostname }}"
+  with_items: "{{ swarm_labels_labels }}"

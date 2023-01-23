@@ -1,0 +1,16 @@
+---
+
+required_vars:
+  - swarm_client_hostname
+  - swarm_client_ca_folder
+  - swarm_client_ca_domain
+  - swarm_client_docker_users
+
+swarm_client_hostname:
+swarm_client_ca_folder:
+swarm_client_ca_domain:
+swarm_client_docker_users:
+  - user: root
+    folder: /root
+  - user: docker
+    folder: /home/docker
