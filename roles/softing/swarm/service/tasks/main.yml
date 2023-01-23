@@ -26,5 +26,5 @@
 
 - debug:
     msg: "Swarm::Service | Trigger update swarm service"
-    notify: update_swarm_service
-    changed_when: true
+  notify: update_swarm_service
+  changed_when: true

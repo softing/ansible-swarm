@@ -1,24 +1,18 @@
 ---
 
-#- name: "{{ swarm_service_title }} : Pull"
-#  ansible.builtin.shell: "docker compose pull"
-#  args:
-#    chdir: "{{ swarm_service_path }}"
-#  listen: "update_swarm_service"
-
 - ansible.builtin.stat:
     path: "{{  swarm_service_path }}/.env"
   register: env_file
   listen: "update_swarm_service"
 
-- name: "{{ swarm_service_title }} : (Re)Start with .env"
+- name: "Swarm::Service | {{ swarm_service_title }} : (Re)Start with .env"
   ansible.builtin.shell: "env $(cat .env | grep ^[A-Z] | xargs) docker-compose -f stack.yml config | docker stack deploy --with-registry-auth -c - {{ swarm_service_id }}"
   args:
     chdir: "{{ swarm_service_path }}"
   listen: "update_swarm_service"
   when: env_file.stat.exists
 
-- name: "{{ swarm_service_title }} : (Re)Start"
+- name: "Swarm::Service | {{ swarm_service_title }} : (Re)Start"
   ansible.builtin.shell: "docker stack deploy --with-registry-auth -c stack.yml {{ swarm_service_id }}"
   args:
     chdir: "{{ swarm_service_path }}"
