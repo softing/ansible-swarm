@@ -18,11 +18,33 @@
     dest: /etc/systemd/system/docker.service.d/docker.conf
     mode: 0440
 
-- name: "Swarm::Server | Copy /etc/docker/daemon.json"
-  template:
-    src: daemon.json.j2
+# Update /etc/docker/daemon.json
+
+- name: Load current facts
+  slurp:
+    path: "/etc/docker/daemon.json"
+  register: daemon_json_raw
+
+- name: Enable fact
+  set_fact:
+    daemon_json: "{{ daemon_json | combine({ 
+      'tlsverify': true,
+      'tlscacert': '/etc/docker/ca.pem',
+      'tlscert': '/etc/docker/server-cert.pem',
+      'tlskey': '/etc/docker/server-key.pem',
+      'hosts': [ 
+        'tcp://127.0.0.1:2376', 
+        'tcp://' + swarm_server_node_ip + ':2376', 
+        'unix:///var/run/docker.sock' 
+      ] 
+    }) }}"
+  vars:
+    daemon_json: "{{ daemon_json_raw.content | b64decode }}"
+
+- name: write modified data to file
+  copy:
+    content: "{{ daemon_json | to_nice_json }}"
     dest: /etc/docker/daemon.json
-    mode: 0440
 
 # Copy CA certs
 

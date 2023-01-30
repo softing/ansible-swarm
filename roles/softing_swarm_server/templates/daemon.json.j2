@@ -1,7 +1,0 @@
-{
-    "tlsverify": true,
-    "tlscacert": "/etc/docker/ca.pem",
-    "tlscert": "/etc/docker/server-cert.pem",
-    "tlskey": "/etc/docker/server-key.pem",
-    "hosts": [ "tcp://127.0.0.1:2376", "tcp://{{ swarm_server_node_ip }}:2376", "unix:///var/run/docker.sock" ]
-}

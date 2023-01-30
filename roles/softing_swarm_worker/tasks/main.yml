@@ -11,5 +11,5 @@
   ignore_errors: true
 
 - name: "Swarm::Worker | Add node to the swarm"
-  shell: "docker swarm join --token {{ swarm_worker_token }} {{ swarm_master_ip }}"
+  shell: "docker swarm join --token {{ swarm_worker_token }} {{ swarm_master_host }}"
   when: "'inactive' in swarm_status.stdout_lines"
