@@ -14,14 +14,14 @@ This project provides:
 
 ## Roles
 
-[softing_swarm_certs](roles%2Fsofting_swarm_certs) - Certificate generator for Docker Swarm cluster nodes
-[softing_swarm_client](roles%2Fsofting_swarm_client) - Configuring a Client on a Linux Host to Connect to a Docker Swarm Cluster
-[softing_swarm_initialize](roles%2Fsofting_swarm_initialize) - Initializing a Docker Swarm Cluster
-[softing_swarm_labels](roles%2Fsofting_swarm_labels) - Setting Labels for Docker Swarm Cluster Nodes
-[softing_swarm_manager](roles%2Fsofting_swarm_manager) - Connecting a node (Linux host) as a manager 
-[softing_swarm_server](roles%2Fsofting_swarm_server) - Configuring a Server on a Linux Host to Connect to a Docker Swarm Cluster
-[softing_swarm_service](roles%2Fsofting_swarm_service) - Creating a Service to Run on a Docker Swarm Cluster 
-[softing_swarm_worker](roles%2Fsofting_swarm_worker) - Connecting a node (Linux host) as a worker
+- [softing_swarm_certs](roles%2Fsofting_swarm_certs) - Certificate generator for Docker Swarm cluster nodes
+- [softing_swarm_client](roles%2Fsofting_swarm_client) - Configuring a Client on a Linux Host to Connect to a Docker Swarm Cluster
+- [softing_swarm_initialize](roles%2Fsofting_swarm_initialize) - Initializing a Docker Swarm Cluster
+- [softing_swarm_labels](roles%2Fsofting_swarm_labels) - Setting Labels for Docker Swarm Cluster Nodes
+- [softing_swarm_manager](roles%2Fsofting_swarm_manager) - Connecting a node (Linux host) as a manager 
+- [softing_swarm_server](roles%2Fsofting_swarm_server) - Configuring a Server on a Linux Host to Connect to a Docker Swarm Cluster
+- [softing_swarm_service](roles%2Fsofting_swarm_service) - Creating a Service to Run on a Docker Swarm Cluster 
+- [softing_swarm_worker](roles%2Fsofting_swarm_worker) - Connecting a node (Linux host) as a worker
 
 ## Source code
 
