@@ -20,12 +20,42 @@
 
 # Update /etc/docker/daemon.json
 
-- name: Load current facts
+- name: "Swarm::Server | Creates /etc/docker directory if not exists"
+  file:
+    path: "/etc/docker"
+    state: directory
+
+- name: "Swarm::Server | Check that the /etc/docker/daemon.json exists"
+  stat:
+    path: "/etc/docker/daemon.json"
+  register: daemon_json_file
+
+- name: "Swarm::Server | Read /etc/docker/daemon.json file"
   slurp:
     path: "/etc/docker/daemon.json"
   register: daemon_json_raw
+  when: daemon_json_file.stat.exists
 
-- name: Enable fact
+- name: "Swarm::Server | Create /etc/docker/daemon.json content"
+  set_fact:
+    daemon_json: "{{ 
+      {
+        'tlsverify': true,
+        'tlscacert': '/etc/docker/ca.pem',
+        'tlscert': '/etc/docker/server-cert.pem',
+        'tlskey': '/etc/docker/server-key.pem',
+        'hosts': [ 
+          'tcp://127.0.0.1:2376', 
+          'tcp://' + swarm_server_node_ip + ':2376', 
+          'unix:///var/run/docker.sock' 
+        ] 
+      } 
+    }}"
+  vars:
+    daemon_json: "{{ daemon_json_raw.content | b64decode }}"
+  when: not daemon_json_file.stat.exists
+
+- name: "Swarm::Server | Create /etc/docker/daemon.json content"
   set_fact:
     daemon_json: "{{ daemon_json | combine({ 
       'tlsverify': true,
@@ -40,8 +70,9 @@
     }) }}"
   vars:
     daemon_json: "{{ daemon_json_raw.content | b64decode }}"
+  when: daemon_json_file.stat.exists
 
-- name: write modified data to file
+- name: "Swarm::Server | Write modified data to /etc/docker/daemon.json file"
   copy:
     content: "{{ daemon_json | to_nice_json }}"
     dest: /etc/docker/daemon.json
